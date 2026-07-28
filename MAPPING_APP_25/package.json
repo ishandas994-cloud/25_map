@@ -1,0 +1,14 @@
+{
+  "name": "building-mapper",
+  "version": "2.0.0",
+  "description": "Record floor/room/step/type data while walking a building, stored in MongoDB, and auto-generate a blueprint-style path map per floor.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mongodb": "^6.9.0"
+  }
+}
