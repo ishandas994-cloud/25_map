@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Building Mapper</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <small>Wayfinding Survey</small>
+      <h1>Building Mapper</h1>
+    </div>
+  </header>
+
+  <div class="modeswitch">
+    <button id="tabRecord" class="active">◉ Record</button>
+    <button id="tabMap">▦ Map</button>
+  </div>
+
+  <div class="floortabs" id="floorTabs"></div>
+
+  <div id="recordView"></div>
+  <div id="mapView" style="display:none"></div>
+
+  <footer>DATA STORED IN MONGODB · SHARED ACROSS DEVICES</footer>
+</div>
+
+<div class="status" id="statusToast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
