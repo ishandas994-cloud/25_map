@@ -16,7 +16,7 @@ async function connect() {
   db = client.db(dbName);
 
   // Helpful indexes: fast lookup by floor, ordered by walking position.
-  await db.collection('points').createIndex({ floor: 1, position: 1 });
+  await db.collection('points').createIndex({ floor: 1, block: 1, position: 1 });
 
   console.log(`Connected to MongoDB (db: ${dbName})`);
   return db;
