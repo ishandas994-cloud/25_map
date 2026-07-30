@@ -12,7 +12,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 const VALID_TYPES = [
   'classroom', 'toilet_girls', 'toilet_boys', 'faculty',
-  'library', 'lab', 'lift', 'stairwell', 'entrance', 'other',
+  'library', 'lab', 'lift', 'stairwell', 'entrance', 'corridor', 'other',
 ];
 const VALID_DIRECTIONS = ['front', 'back', 'left', 'right'];
 const VALID_BLOCKS = ['A', 'B', 'C'];
@@ -34,6 +34,9 @@ function serialize(doc) {
     steps: doc.steps,
     direction: doc.direction,
     position: doc.position,
+    parentId: doc.parentId ? doc.parentId.toString() : null,
+    along: typeof doc.along === 'number' ? doc.along : null,
+    corridorLength: typeof doc.corridorLength === 'number' ? doc.corridorLength : null,
     createdAt: doc.createdAt,
   };
 }
@@ -92,6 +95,19 @@ app.post('/api/floors/:floor/blocks/:block/points', async (req, res) => {
   const nextPosition = last.length ? last[0].position + 1 : 0;
   const isFirstPoint = nextPosition === 0;
 
+  let parentDoc = null;
+  if (!isFirstPoint) {
+    const requestedParentId = (req.body.parentId || '').toString().trim();
+    if (requestedParentId) {
+      if (!ObjectId.isValid(requestedParentId)) return res.status(400).json({ error: 'Invalid parentId' });
+      parentDoc = await points().findOne({ _id: new ObjectId(requestedParentId), floor, block });
+      if (!parentDoc) return res.status(400).json({ error: 'Parent point not found in this block' });
+    } else {
+      // Default: branch off the most recently added point, same as the old linear behaviour.
+      parentDoc = last[0];
+    }
+  }
+
   const steps = isFirstPoint ? 0 : (parseInt(req.body.steps, 10) || 0);
 
   let direction = (req.body.direction || '').toString().toLowerCase();
@@ -99,6 +115,25 @@ app.post('/api/floors/:floor/blocks/:block/points', async (req, res) => {
     direction = null; // start point has no "coming from" direction
   } else if (!VALID_DIRECTIONS.includes(direction)) {
     return res.status(400).json({ error: 'Direction must be front, back, left, or right' });
+  }
+
+  // "along" only applies when branching off a corridor: how far down the
+  // corridor's length the branch point sits (0 = corridor start).
+  let along = null;
+  if (!isFirstPoint && parentDoc && parentDoc.type === 'corridor' && type !== 'corridor') {
+    const rawAlong = parseInt(req.body.along, 10);
+    along = Number.isFinite(rawAlong) ? Math.max(0, rawAlong) : 0;
+    if (typeof parentDoc.corridorLength === 'number') {
+      along = Math.min(along, parentDoc.corridorLength);
+    }
+  }
+
+  // corridorLength only applies to corridor-type points: how long the
+  // hallway itself runs, starting from this point's position.
+  let corridorLength = null;
+  if (type === 'corridor') {
+    const rawLength = parseInt(req.body.corridorLength, 10);
+    corridorLength = Number.isFinite(rawLength) && rawLength > 0 ? rawLength : 1;
   }
 
   const doc = {
@@ -109,6 +144,9 @@ app.post('/api/floors/:floor/blocks/:block/points', async (req, res) => {
     steps,
     direction,
     position: nextPosition,
+    parentId: parentDoc ? parentDoc._id : null,
+    along,
+    corridorLength,
     createdAt: new Date(),
   };
 
