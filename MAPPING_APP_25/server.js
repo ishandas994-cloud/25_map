@@ -139,6 +139,15 @@ app.delete('/api/floors/:floor/blocks/:block', async (req, res) => {
   res.status(204).end();
 });
 
+// Erase an ENTIRE floor — every block (A, B, C) on that floor, all at once
+app.delete('/api/floors/:floor', async (req, res) => {
+  const floor = parseInt(req.params.floor, 10);
+  if (!validFloor(floor)) return res.status(400).json({ error: 'Floor must be 1-4' });
+
+  const result = await points().deleteMany({ floor });
+  res.json({ floor, deletedCount: result.deletedCount });
+});
+
 // ---------- Startup ----------
 connect()
   .then(() => {
