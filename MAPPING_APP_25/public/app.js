@@ -101,6 +101,20 @@ async function resetBlock(floor, block) {
   }
 }
 
+async function eraseFloor(floor) {
+  const confirmed = confirm(
+    `Erase ALL data on Floor ${floor} — Blocks A, B, and C? This cannot be undone.`
+  );
+  if (!confirmed) return;
+  try {
+    const result = await api(`/api/floors/${floor}`, { method: 'DELETE' });
+    toast(`Erased Floor ${floor} (${result.deletedCount} points removed)`);
+    await refresh();
+  } catch (e) {
+    toast(e.message || 'Erase failed');
+  }
+}
+
 // ---------- FLOOR + BLOCK TABS ----------
 function renderFloorTabs() {
   const el = $('#floorTabs');
@@ -124,6 +138,14 @@ function renderBlockTabs() {
     b.onclick = () => { currentBlock = blk; refresh(); };
     el.appendChild(b);
   });
+}
+
+function renderEraseFloorButton() {
+  const el = $('#eraseFloorRow');
+  const total = floorCounts[currentFloor] || 0;
+  el.innerHTML = `<button class="btn danger" id="eraseFloorBtn" ${total === 0 ? 'disabled' : ''}>🗑 Erase Entire Floor ${currentFloor} (${total} pts, all blocks)</button>`;
+  const btn = $('#eraseFloorBtn');
+  if (btn) btn.onclick = () => eraseFloor(currentFloor);
 }
 
 // ---------- RECORD VIEW ----------
@@ -296,6 +318,7 @@ async function refresh() {
 function render() {
   renderFloorTabs();
   renderBlockTabs();
+  renderEraseFloorButton();
   if (currentMode === 'record') {
     $('#recordView').style.display = 'block';
     $('#mapView').style.display = 'none';
