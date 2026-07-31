@@ -95,3 +95,44 @@ select:focus{outline:none;border-color:var(--accent);}
 .status{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);background:var(--good);color:#06251c;font-family:var(--mono);font-size:12px;padding:8px 16px;border-radius:20px;box-shadow:0 4px 16px rgba(0,0,0,.4);opacity:0;transition:opacity .2s;pointer-events:none;}
 .status.show{opacity:1;}
 footer{text-align:center;font-family:var(--mono);font-size:11px;color:var(--grid);margin-top:24px;letter-spacing:.06em;}
+.dir-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.dir-grid button {
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background: #222;
+  color: white;
+  cursor: pointer;
+}
+
+.dir-grid button.active {
+  background: #4caf50;
+}
+.corridorChoices {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 10px;
+margin: 10px 0;
+}
+
+.corridorChoices button {
+padding: 14px;
+border-radius: 10px;
+border: 1px solid var(--grid);
+background: var(--ink);
+color: var(--paper);
+font-weight: 600;
+cursor: pointer;
+}
+
+.corridorChoices button:active {
+background: var(--accent);
+color: black;
+}
